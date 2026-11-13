@@ -1,6 +1,6 @@
 # Rush Hour Game (Project feladat)
 
-Egy Java alapon megvalósított, parancssori/konzolos Rush Hour táblajáték projekt a Debreceni Egyetem Informatikai Karának kurzusához.
+Egy Java alapon megvalósított, parancssori/konzolos Rush Hour táblajáték projekt a Nyiregyhazi Egyetem Informatikai Karának kurzusához.
 
 ## 📦 Technológiai Stack és Követelmények
 
