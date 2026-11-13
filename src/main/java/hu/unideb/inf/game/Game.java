@@ -23,7 +23,7 @@ public class Game {
         String mode = scanner.nextLine().trim();
 
         if ("2".equals(mode)) {
-            System.out.print("Adja meg a fájl elérését (pl: map.txt): ");
+            System.out.print("Adja meg a fájl elérését (pl: map2.txt): ");
             String path = scanner.nextLine().trim();
             board = GameLoader.loadOrDefault(path);
         } else {
@@ -80,7 +80,7 @@ public class Game {
             vehicle.move(steps);
 
             // Győzelem ellenőrzés Humánnak ('A' autó elérte a jobb szélt)
-            if (vehicle.getId().equalsIgnoreCase("A") && vehicle.getTopLeft().col() + vehicle.getLength() >= board.getCols()) {
+            if (vehicle.getId().equalsIgnoreCase("1") && vehicle.getTopLeft().col() + vehicle.getLength() >= board.getCols()) {
                 renderBoard();
                 System.out.println("\n GRATULÁLOK " + playerName + ", NYERTÉL!");
                 highScoreDao.recordWin(playerName);
@@ -93,7 +93,7 @@ public class Game {
             ai.makeMove(board);
 
             // Győzelem ellenőrzés AI-nak ('B' autó elérte a bal szélt)
-            Optional<Vehicle> bOpt = board.getVehicleById("B");
+            Optional<Vehicle> bOpt = board.getVehicleById("2");
             if (bOpt.isPresent() && bOpt.get().getTopLeft().col() <= 0) {
                 renderBoard();
                 System.out.println("\n A GÉPI JÁTÉKOS NYERT!");

@@ -16,7 +16,7 @@ public class GameLoader {
     public static Board loadOrDefault(String filePath) {
         File file = new File(filePath);
         if (!file.exists()) {
-            logger.info("Fájl nem található ({}), alapértelmezett pálya töltődik be.", filePath);
+            logger.info("Fajl nem talalhato ({}), alapertelmezett palya toltodik be.", filePath);
             return createDefaultBoard();
         }
 
@@ -45,14 +45,15 @@ public class GameLoader {
 
     public static Board createDefaultBoard() {
         Board board = new Board(6, 12);
-        // Humán céljármű (A)
-        board.addVehicle(new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(2, 0)));
-        // AI céljármű (B)
-        board.addVehicle(new Vehicle("B", 2, Orientation.HORIZONTAL, new Coordinate(3, 10)));
+        // Humán céljármű (1)
+        board.addVehicle(new Vehicle("1", 2, Orientation.HORIZONTAL, new Coordinate(2, 0)));
+        // AI céljármű (2)
+        board.addVehicle(new Vehicle("2", 2, Orientation.HORIZONTAL, new Coordinate(3, 10)));
         // Akadályok
-        board.addVehicle(new Vehicle("C", 3, Orientation.VERTICAL, new Coordinate(1, 2)));
-        board.addVehicle(new Vehicle("D", 2, Orientation.HORIZONTAL, new Coordinate(0, 4)));
-        board.addVehicle(new Vehicle("E", 2, Orientation.VERTICAL, new Coordinate(3, 5)));
+        board.addVehicle(new Vehicle("A", 3, Orientation.VERTICAL, new Coordinate(1, 2)));
+        board.addVehicle(new Vehicle("B", 2, Orientation.HORIZONTAL, new Coordinate(0, 4)));
+        board.addVehicle(new Vehicle("C", 2, Orientation.VERTICAL, new Coordinate(3, 5)));
+        board.addVehicle(new Vehicle("D", 3, Orientation.HORIZONTAL, new Coordinate(1, 7)));
         return board;
     }
 }
