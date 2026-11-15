@@ -54,6 +54,12 @@
 
     <build>
         <plugins>
+            <!-- Biztosítja a JUnit 5 tesztek futtatását Maven alatt -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
             <!-- JAR Plugin a Main class konfigurációhoz -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
