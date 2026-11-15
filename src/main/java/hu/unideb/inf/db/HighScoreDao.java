@@ -3,14 +3,27 @@ package hu.unideb.inf.db;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class HighScoreDao {
     private static final Logger logger = LoggerFactory.getLogger(HighScoreDao.class);
     private static final String DB_URL = "jdbc:h2:./database";
 
+    private final String dbUrl;
+
     public HighScoreDao() {
-        try (Connection conn = DriverManager.getConnection(DB_URL, "sa", "");
+        this(DB_URL);
+    }
+
+    // Package-private constructor used by tests to provide an isolated in-memory database.
+    HighScoreDao(String dbUrl) {
+        this.dbUrl = dbUrl;
+        try (Connection conn = DriverManager.getConnection(this.dbUrl, "sa", "");
              Statement stmt = conn.createStatement()) {
             stmt.executeUpdate("CREATE TABLE IF NOT EXISTS HIGHSCORES (" +
                     "player_name VARCHAR(255) PRIMARY KEY, " +
@@ -22,7 +35,7 @@ public class HighScoreDao {
 
     public void recordWin(String playerName) {
         String sql = "MERGE INTO HIGHSCORES KEY(player_name) VALUES (?, COALESCE((SELECT wins + 1 FROM HIGHSCORES WHERE player_name = ?), 1))";
-        try (Connection conn = DriverManager.getConnection(DB_URL, "sa", "");
+        try (Connection conn = DriverManager.getConnection(dbUrl, "sa", "");
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, playerName);
             pstmt.setString(2, playerName);
@@ -35,7 +48,7 @@ public class HighScoreDao {
     public void printHighScores() {
         System.out.println("\n--- HIGH SCORE TÁBLÁZAT ---");
         String sql = "SELECT player_name, wins FROM HIGHSCORES ORDER BY wins DESC";
-        try (Connection conn = DriverManager.getConnection(DB_URL, "sa", "");
+        try (Connection conn = DriverManager.getConnection(dbUrl, "sa", "");
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
