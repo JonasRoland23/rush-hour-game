@@ -1,0 +1,76 @@
+package hu.unideb.inf.db;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class HighScoreDaoTest {
+
+    private HighScoreDao createDao() {
+        String databaseName = "highscore_test_" + UUID.randomUUID().toString().replace("-", "");
+        return new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
+    }
+
+    private int getWins(String databaseName, String playerName) throws Exception {
+        try (Connection connection = DriverManager.getConnection(
+                "jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1", "sa", "");
+             PreparedStatement statement = connection.prepareStatement(
+                     "SELECT wins FROM HIGHSCORES WHERE player_name = ?")) {
+            statement.setString(1, playerName);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                assertTrue(resultSet.next());
+                return resultSet.getInt("wins");
+            }
+        }
+    }
+
+    @Test
+    void recordsFirstWin() throws Exception {
+        String databaseName = "highscore_first_" + UUID.randomUUID().toString().replace("-", "");
+        HighScoreDao dao = new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
+
+        dao.recordWin("Roland");
+
+        assertEquals(1, getWins(databaseName, "Roland"));
+    }
+
+    @Test
+    void incrementsWinCountForTheSamePlayer() throws Exception {
+        String databaseName = "highscore_repeat_" + UUID.randomUUID().toString().replace("-", "");
+        HighScoreDao dao = new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
+
+        dao.recordWin("Roland");
+        dao.recordWin("Roland");
+        dao.recordWin("Roland");
+
+        assertEquals(3, getWins(databaseName, "Roland"));
+    }
+
+    @Test
+    void printsRecordedPlayersInHighScoreTable() {
+        String databaseName = "highscore_print_" + UUID.randomUUID().toString().replace("-", "");
+        HighScoreDao dao = new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
+        dao.recordWin("Roland");
+
+        PrintStream originalOut = System.out;
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        try {
+            System.setOut(new PrintStream(output, true, StandardCharsets.UTF_8));
+            dao.printHighScores();
+        } finally {
+            System.setOut(originalOut);
+        }
+
+        assertTrue(output.toString(StandardCharsets.UTF_8).contains("Roland"));
+        assertTrue(output.toString(StandardCharsets.UTF_8).contains("1 győzelem"));
+    }
+}
