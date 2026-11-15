@@ -79,7 +79,7 @@ public class Game {
 
             vehicle.move(steps);
 
-            // Győzelem ellenőrzés Humánnak ('A' autó elérte a jobb szélt)
+            // Győzelem ellenőrzés Humánnak ('1' autó elérte a jobb szélt)
             if (vehicle.getId().equalsIgnoreCase("1") && vehicle.getTopLeft().col() + vehicle.getLength() >= board.getCols()) {
                 renderBoard();
                 System.out.println("\n GRATULÁLOK " + playerName + ", NYERTÉL!");
@@ -92,7 +92,7 @@ public class Game {
             System.out.println("\n--- GÉPI JÁTÉKOS LÉP ---");
             ai.makeMove(board);
 
-            // Győzelem ellenőrzés AI-nak ('B' autó elérte a bal szélt)
+            // Győzelem ellenőrzés AI-nak ('2' autó elérte a bal szélt)
             Optional<Vehicle> bOpt = board.getVehicleById("2");
             if (bOpt.isPresent() && bOpt.get().getTopLeft().col() <= 0) {
                 renderBoard();
