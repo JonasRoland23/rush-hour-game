@@ -15,11 +15,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HighScoreDaoTest {
 
-    private HighScoreDao createDao() {
-        String databaseName = "highscore_test_" + UUID.randomUUID().toString().replace("-", "");
-        return new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
-    }
-
     private int getWins(String databaseName, String playerName) throws Exception {
         try (Connection connection = DriverManager.getConnection(
                 "jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1", "sa", "");
