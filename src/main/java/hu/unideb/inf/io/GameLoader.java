@@ -29,7 +29,10 @@ public final class GameLoader {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
-    private record BoardSnapshot(int rows, int cols, List<Vehicle> vehicles) {
+    record VehicleData(String id, int length, Orientation orientation, Coordinate topLeft) {
+    }
+
+    record BoardSnapshot(int rows, int cols, List<VehicleData> vehicles) {
     }
 
     private GameLoader() {
@@ -98,7 +101,10 @@ public final class GameLoader {
         Path path = Path.of(filePath.trim());
         if (filePath.trim().toLowerCase(Locale.ROOT).endsWith(".json")) {
             try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
-                BoardSnapshot snapshot = new BoardSnapshot(board.getRows(), board.getCols(), board.getVehicles());
+                List<VehicleData> vehicleData = board.getVehicles().stream()
+                        .map(v -> new VehicleData(v.id(), v.length(), v.orientation(), v.topLeft()))
+                        .toList();
+                BoardSnapshot snapshot = new BoardSnapshot(board.getRows(), board.getCols(), vehicleData);
                 OBJECT_MAPPER.writeValue(writer, snapshot);
             }
             return;
@@ -138,8 +144,8 @@ public final class GameLoader {
                 if (snapshot.vehicles() == null || snapshot.vehicles().isEmpty()) {
                     throw new IllegalArgumentException("A JSON pálya nem tartalmaz járműveket.");
                 }
-                for (Vehicle vehicle : snapshot.vehicles()) {
-                    board.addVehicle(vehicle);
+                for (VehicleData v : snapshot.vehicles()) {
+                    board.addVehicle(new Vehicle(v.id(), v.length(), v.orientation(), v.topLeft()));
                 }
                 return board;
             }
