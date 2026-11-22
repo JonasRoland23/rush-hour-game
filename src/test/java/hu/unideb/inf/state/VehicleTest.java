@@ -4,74 +4,64 @@ import hu.unideb.inf.model.Coordinate;
 import hu.unideb.inf.model.Orientation;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class VehicleTest {
 
     @Test
-    void returnsOccupiedCoordinatesForHorizontalVehicle() {
-        Vehicle vehicle = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(1, 1));
+    void testGetOccupiedCoordinatesShouldReturnAllCellsForHorizontalAndVertical() {
+        Vehicle horizontal = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(1, 1));
+        Vehicle vertical = new Vehicle("B", 3, Orientation.VERTICAL, new Coordinate(0, 2));
 
-        assertEquals(2, vehicle.getOccupiedCoordinates().size());
-        assertTrue(vehicle.getOccupiedCoordinates().contains(new Coordinate(1, 1)));
-        assertTrue(vehicle.getOccupiedCoordinates().contains(new Coordinate(1, 2)));
+        assertEquals(2, horizontal.getOccupiedCoordinates().size());
+        assertTrue(horizontal.occupies(new Coordinate(1, 1)));
+        assertTrue(horizontal.occupies(new Coordinate(1, 2)));
+        assertFalse(horizontal.occupies(new Coordinate(2, 1)));
+
+        assertEquals(3, vertical.getOccupiedCoordinates().size());
+        assertTrue(vertical.occupies(new Coordinate(0, 2)));
+        assertTrue(vertical.occupies(new Coordinate(1, 2)));
+        assertTrue(vertical.occupies(new Coordinate(2, 2)));
     }
 
     @Test
-    void returnsOccupiedCoordinatesForVerticalVehicle() {
-        Vehicle vehicle = new Vehicle("B", 3, Orientation.VERTICAL, new Coordinate(0, 2));
+    void testMovedShouldReturnNewImmutableInstanceWithoutMutatingOriginal() {
+        Vehicle original = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(1, 1));
 
-        assertEquals(3, vehicle.getOccupiedCoordinates().size());
-        assertTrue(vehicle.getOccupiedCoordinates().contains(new Coordinate(0, 2)));
-        assertTrue(vehicle.getOccupiedCoordinates().contains(new Coordinate(1, 2)));
-        assertTrue(vehicle.getOccupiedCoordinates().contains(new Coordinate(2, 2)));
+        Vehicle forward = original.moved(2);
+        Vehicle backward = forward.moved(-1);
+
+        assertEquals(new Coordinate(1, 1), original.topLeft());
+        assertEquals(new Coordinate(1, 3), forward.topLeft());
+        assertEquals(new Coordinate(1, 2), backward.topLeft());
     }
 
     @Test
-    void movesHorizontalVehicleInBothDirections() {
-        Vehicle vehicle = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(1, 1));
+    void testValueObjectEqualityHashCodeAndToString() {
+        Vehicle v1 = new Vehicle("A", 2, Orientation.VERTICAL, new Coordinate(0, 0));
+        Vehicle v2 = new Vehicle("A", 2, Orientation.VERTICAL, new Coordinate(0, 0));
+        Vehicle v3 = new Vehicle("A", 2, Orientation.VERTICAL, new Coordinate(1, 0));
+        Vehicle v4 = new Vehicle("B", 2, Orientation.VERTICAL, new Coordinate(0, 0));
 
-        vehicle.move(2);
-        assertEquals(new Coordinate(1, 3), vehicle.getTopLeft());
-
-        vehicle.move(-1);
-        assertEquals(new Coordinate(1, 2), vehicle.getTopLeft());
+        assertEquals(v1, v2);
+        assertEquals(v1.hashCode(), v2.hashCode());
+        assertNotEquals(v1, v3);
+        assertNotEquals(v1, v4);
+        assertTrue(v1.toString().contains("A"));
+        assertThrows(UnsupportedOperationException.class, () -> v1.getOccupiedCoordinates().clear());
     }
 
     @Test
-    void movesVerticalVehicleInBothDirections() {
-        Vehicle vehicle = new Vehicle("B", 2, Orientation.VERTICAL, new Coordinate(1, 1));
-
-        vehicle.move(2);
-        assertEquals(new Coordinate(3, 1), vehicle.getTopLeft());
-
-        vehicle.move(-1);
-        assertEquals(new Coordinate(2, 1), vehicle.getTopLeft());
-    }
-
-    @Test
-    void checksWhetherVehicleOccupiesCoordinate() {
-        Vehicle vehicle = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(1, 1));
-
-        assertTrue(vehicle.occupies(new Coordinate(1, 1)));
-        assertTrue(vehicle.occupies(new Coordinate(1, 2)));
-        assertFalse(vehicle.occupies(new Coordinate(2, 1)));
-    }
-
-    @Test
-    void exposesPropertiesAndComparesVehiclesById() {
-        Vehicle first = new Vehicle("B", 2, Orientation.VERTICAL, new Coordinate(0, 0));
-        Vehicle sameId = new Vehicle("B", 3, Orientation.HORIZONTAL, new Coordinate(2, 2));
-        Vehicle differentId = new Vehicle("C", 2, Orientation.VERTICAL, new Coordinate(0, 0));
-
-        assertEquals("B", first.getId());
-        assertEquals(2, first.getLength());
-        assertEquals(Orientation.VERTICAL, first.getOrientation());
-        assertEquals(first, sameId);
-        assertEquals(first.hashCode(), sameId.hashCode());
-        assertNotEquals(first, differentId);
-
-        first.setTopLeft(new Coordinate(4, 4));
-        assertEquals(new Coordinate(4, 4), first.getTopLeft());
+    void testConstructorShouldRejectInvalidArguments() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Vehicle("A", 1, Orientation.HORIZONTAL, new Coordinate(0, 0)));
+        assertThrows(IllegalArgumentException.class,
+                () -> new Vehicle(" ", 2, Orientation.HORIZONTAL, new Coordinate(0, 0)));
+        assertThrows(NullPointerException.class,
+                () -> new Vehicle("A", 2, Orientation.HORIZONTAL, null));
     }
 }
