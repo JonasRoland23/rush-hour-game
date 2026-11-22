@@ -25,7 +25,7 @@ import java.util.Scanner;
 
 public final class GameLoader {
     private static final Logger logger = LoggerFactory.getLogger(GameLoader.class);
-    private static final String DEFAULT_RESOURCE = "/map2.txt";
+    private static final String DEFAULT_RESOURCE = "/map1.txt";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
