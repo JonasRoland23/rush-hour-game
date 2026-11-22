@@ -22,13 +22,22 @@ class GameLoaderTest {
     Path tempDir;
 
     @Test
-    void testLoadDefaultBoardShouldReadPackagedMap2Resource() {
+    void testLoadDefaultBoardShouldReadPackagedMap1Resource() {
         Board board = GameLoader.loadDefaultBoard();
 
         assertEquals(6, board.getRows());
         assertEquals(12, board.getCols());
         assertTrue(board.getVehicleById("1").isPresent());
         assertTrue(board.getVehicleById("2").isPresent());
+        assertEquals(new Coordinate(2, 0), board.getVehicleById("1").orElseThrow().topLeft());
+    }
+
+    @Test
+    void testLoadOrDefaultShouldReadPackagedMap2Resource() {
+        Board board = GameLoader.loadOrDefault("map2.txt");
+
+        assertEquals(6, board.getRows());
+        assertEquals(12, board.getCols());
         assertEquals(new Coordinate(4, 1), board.getVehicleById("1").orElseThrow().topLeft());
     }
 
