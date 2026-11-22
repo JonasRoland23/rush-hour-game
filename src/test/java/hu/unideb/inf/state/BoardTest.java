@@ -21,17 +21,14 @@ class BoardTest {
 
     @Test
     void testMoveShouldBeRejectedWhenPathIsBlocked() {
-        // Given
         Board board = new Board(6, 6);
         Vehicle moving = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(2, 0));
         Vehicle obstacle = new Vehicle("B", 2, Orientation.VERTICAL, new Coordinate(1, 2));
         board.addVehicle(moving);
         board.addVehicle(obstacle);
 
-        // When
         boolean canMove = board.canMove(moving, 1);
 
-        // Then
         assertFalse(canMove);
     }
 
@@ -49,14 +46,12 @@ class BoardTest {
 
     @Test
     void testTargetVehicle1ShouldWinOnlyThroughRightExit() {
-        // Given
         Board board = new Board(3, 6);
         Vehicle humanTarget = new Vehicle("1", 2, Orientation.HORIZONTAL, new Coordinate(1, 2));
         Vehicle aiTarget = new Vehicle("2", 2, Orientation.HORIZONTAL, new Coordinate(0, 2));
         board.addVehicle(humanTarget);
         board.addVehicle(aiTarget);
 
-        // When & Then: vehicle 1 cannot leave on the left, only on the right exit (1, 6)
         assertFalse(board.canMove(humanTarget, -3));
         assertTrue(board.canMove(humanTarget, 3));
         board.moveVehicle(humanTarget, 3);
@@ -66,14 +61,12 @@ class BoardTest {
 
     @Test
     void testTargetVehicle2ShouldWinOnlyThroughLeftExit() {
-        // Given
         Board board = new Board(3, 6);
         Vehicle humanTarget = new Vehicle("1", 2, Orientation.HORIZONTAL, new Coordinate(0, 2));
         Vehicle aiTarget = new Vehicle("2", 2, Orientation.HORIZONTAL, new Coordinate(1, 2));
         board.addVehicle(humanTarget);
         board.addVehicle(aiTarget);
 
-        // When & Then: vehicle 2 cannot leave on the right, only on the left exit (1, -1)
         assertFalse(board.canMove(aiTarget, 3));
         assertTrue(board.canMove(aiTarget, -3));
         board.moveVehicle(aiTarget, -3);
