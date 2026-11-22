@@ -1,3 +1,4 @@
+// src/test/java/hu/unideb/inf/db/HighScoreDaoTest.java
 package hu.unideb.inf.db;
 
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HighScoreDaoTest {
 
@@ -29,7 +31,7 @@ class HighScoreDaoTest {
     }
 
     @Test
-    void recordsFirstWin() throws Exception {
+    void testRecordWinShouldInsertFirstVictory() throws Exception {
         String databaseName = "highscore_first_" + UUID.randomUUID().toString().replace("-", "");
         HighScoreDao dao = new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
 
@@ -39,7 +41,7 @@ class HighScoreDaoTest {
     }
 
     @Test
-    void incrementsWinCountForTheSamePlayer() throws Exception {
+    void testRecordWinShouldIncrementExistingVictoryCount() throws Exception {
         String databaseName = "highscore_repeat_" + UUID.randomUUID().toString().replace("-", "");
         HighScoreDao dao = new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
 
@@ -51,7 +53,7 @@ class HighScoreDaoTest {
     }
 
     @Test
-    void printsRecordedPlayersInHighScoreTable() {
+    void testPrintHighScoresShouldOutputSavedPlayers() {
         String databaseName = "highscore_print_" + UUID.randomUUID().toString().replace("-", "");
         HighScoreDao dao = new HighScoreDao("jdbc:h2:mem:" + databaseName + ";DB_CLOSE_DELAY=-1");
         dao.recordWin("Roland");
@@ -66,7 +68,8 @@ class HighScoreDaoTest {
             System.setOut(originalOut);
         }
 
-        assertTrue(output.toString(StandardCharsets.UTF_8).contains("Roland"));
-        assertTrue(output.toString(StandardCharsets.UTF_8).contains("1 győzelem"));
+        String text = output.toString(StandardCharsets.UTF_8);
+        assertTrue(text.contains("Roland"));
+        assertTrue(text.contains("1 győzelem"));
     }
 }
