@@ -9,15 +9,23 @@ import java.util.List;
 import java.util.Random;
 
 public class SimpleAI {
-    private final Random random = new Random();
+    private final Random random;
+
+    public SimpleAI() {
+        this(new Random());
+    }
+
+    SimpleAI(Random random) {
+        this.random = random;
+    }
 
     public boolean makeMove(Board board) {
         List<Vehicle> vehicles = new ArrayList<>(board.getVehicles());
-        Collections.shuffle(vehicles);
+        Collections.shuffle(vehicles, random);
 
         for (Vehicle v : vehicles) {
             List<Integer> validSteps = new ArrayList<>();
-            int maxStep = Math.max(board.getRows(), board.getCols());
+            int maxStep = Math.max(board.getRows(), board.getCols()) + 1;
             for (int step = -maxStep; step <= maxStep; step++) {
                 if (step != 0 && board.canMove(v, step)) {
                     validSteps.add(step);
@@ -26,8 +34,8 @@ public class SimpleAI {
 
             if (!validSteps.isEmpty()) {
                 int chosenStep = validSteps.get(random.nextInt(validSteps.size()));
-                v.move(chosenStep);
-                System.out.println("AI lépett: Jármű " + v.getId() + " elmozdítva " + chosenStep + " mezővel.");
+                board.moveVehicle(v, chosenStep);
+                System.out.println("AI lépett: Jármű " + v.id() + " elmozdítva " + chosenStep + " mezővel.");
                 return true;
             }
         }
