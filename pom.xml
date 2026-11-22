@@ -19,7 +19,7 @@
         <!-- Tesztelés (JUnit 5 & Mockito) -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
+            <artifactId>junit-jupiter</artifactId>
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
@@ -54,6 +54,22 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <release>21</release>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+
             <!-- JAR Plugin a Main class konfigurációhoz -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -94,7 +110,7 @@
                 </executions>
             </plugin>
 
-            <!-- JaCoCo plugin: 80% lefedettségi elvárás a state csomagra -->
+            <!-- JaCoCo plugin: legalább 80% sorlefedettség BUNDLE szinten -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -114,16 +130,14 @@
                     </execution>
                     <execution>
                         <id>jacoco-check</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>check</goal>
                         </goals>
                         <configuration>
                             <rules>
                                 <rule>
-                                    <element>PACKAGE</element>
-                                    <includes>
-                                        <include>hu.unideb.inf.state</include>
-                                    </includes>
+                                    <element>BUNDLE</element>
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
@@ -146,8 +160,9 @@
                 <configuration>
                     <configLocation>${project.basedir}/checkstyle.xml</configLocation>
                     <consoleOutput>true</consoleOutput>
-                    <failsOnError>false</failsOnError>
-                    <failOnViolation>false</failOnViolation>
+                    <failsOnError>true</failsOnError>
+                    <failOnViolation>true</failOnViolation>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
                     <linkXRef>false</linkXRef>
                 </configuration>
                 <executions>
