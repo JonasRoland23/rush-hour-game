@@ -1,3 +1,4 @@
+// src/test/java/hu/unideb/inf/game/SimpleAITest.java
 package hu.unideb.inf.game;
 
 import hu.unideb.inf.model.Coordinate;
@@ -6,31 +7,46 @@ import hu.unideb.inf.state.Board;
 import hu.unideb.inf.state.Vehicle;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SimpleAITest {
 
     @Test
-    void makesAValidMoveWhenOneIsAvailable() {
+    void testMakeMoveShouldSlideVehicleToValidPosition() {
         Board board = new Board(1, 3);
-        Vehicle vehicle = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(0, 0));
-        board.addVehicle(vehicle);
+        board.addVehicle(new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(0, 0)));
+        SimpleAI ai = new SimpleAI(new Random(42));
 
-        SimpleAI ai = new SimpleAI();
+        boolean moved = ai.makeMove(board);
 
-        assertTrue(ai.makeMove(board));
-        assertEquals(new Coordinate(0, 1), vehicle.getTopLeft());
+        assertTrue(moved);
+        assertEquals(new Coordinate(0, 1), board.getVehicleById("A").orElseThrow().topLeft());
     }
 
     @Test
-    void returnsFalseWhenNoVehicleCanMove() {
+    void testMakeMoveShouldReturnFalseWhenCompletelyBlocked() {
         Board board = new Board(1, 2);
-        Vehicle vehicle = new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(0, 0));
-        board.addVehicle(vehicle);
-
+        board.addVehicle(new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(0, 0)));
         SimpleAI ai = new SimpleAI();
 
-        assertFalse(ai.makeMove(board));
-        assertEquals(new Coordinate(0, 0), vehicle.getTopLeft());
+        boolean moved = ai.makeMove(board);
+
+        assertFalse(moved);
+        assertEquals(new Coordinate(0, 0), board.getVehicleById("A").orElseThrow().topLeft());
+    }
+
+    @Test
+    void testMakeMoveShouldNeverPerformZeroStep() {
+        Board board = new Board(1, 4);
+        board.addVehicle(new Vehicle("A", 2, Orientation.HORIZONTAL, new Coordinate(0, 1)));
+        SimpleAI ai = new SimpleAI(new Random(7));
+
+        assertTrue(ai.makeMove(board));
+        assertNotEquals(new Coordinate(0, 1), board.getVehicleById("A").orElseThrow().topLeft());
     }
 }
