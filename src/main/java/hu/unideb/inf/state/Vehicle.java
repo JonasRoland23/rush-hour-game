@@ -7,59 +7,40 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class Vehicle {
-    private final String id;
-    private final int length;
-    private final Orientation orientation;
-    private Coordinate topLeft;
+public record Vehicle(String id, int length, Orientation orientation, Coordinate topLeft) {
 
-    public Vehicle(String id, int length, Orientation orientation, Coordinate topLeft) {
-        this.id = id;
-        this.length = length;
-        this.orientation = orientation;
-        this.topLeft = topLeft;
+    public Vehicle {
+        id = Objects.requireNonNull(id, "A jármű azonosítója nem lehet null.").trim();
+        orientation = Objects.requireNonNull(orientation, "A jármű iránya nem lehet null.");
+        topLeft = Objects.requireNonNull(topLeft, "A jármű pozíciója nem lehet null.");
+        if (id.isEmpty()) {
+            throw new IllegalArgumentException("A jármű azonosítója nem lehet üres.");
+        }
+        if (length < 2) {
+            throw new IllegalArgumentException("A jármű hossza legalább 2 mező kell legyen.");
+        }
     }
 
-    public String getId() { return id; }
-    public int getLength() { return length; }
-    public Orientation getOrientation() { return orientation; }
-    public Coordinate getTopLeft() { return topLeft; }
-    public void setTopLeft(Coordinate topLeft) { this.topLeft = topLeft; }
+    public Vehicle moved(int steps) {
+        if (orientation == Orientation.HORIZONTAL) {
+            return new Vehicle(id, length, orientation, topLeft.translate(0, steps));
+        }
+        return new Vehicle(id, length, orientation, topLeft.translate(steps, 0));
+    }
 
     public List<Coordinate> getOccupiedCoordinates() {
-        List<Coordinate> coords = new ArrayList<>();
+        List<Coordinate> coords = new ArrayList<>(length);
         for (int i = 0; i < length; i++) {
             if (orientation == Orientation.HORIZONTAL) {
-                coords.add(new Coordinate(topLeft.row(), topLeft.col() + i));
+                coords.add(topLeft.translate(0, i));
             } else {
-                coords.add(new Coordinate(topLeft.row() + i, topLeft.col()));
+                coords.add(topLeft.translate(i, 0));
             }
         }
-        return coords;
+        return List.copyOf(coords);
     }
 
     public boolean occupies(Coordinate coord) {
         return getOccupiedCoordinates().contains(coord);
-    }
-
-    public void move(int steps) {
-        if (orientation == Orientation.HORIZONTAL) {
-            this.topLeft = new Coordinate(topLeft.row(), topLeft.col() + steps);
-        } else {
-            this.topLeft = new Coordinate(topLeft.row() + steps, topLeft.col());
-        }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Vehicle vehicle = (Vehicle) o;
-        return Objects.equals(id, vehicle.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
     }
 }
