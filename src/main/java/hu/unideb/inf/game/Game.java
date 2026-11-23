@@ -54,7 +54,7 @@ public class Game {
             renderBoard();
 
             System.out.println("\n" + playerName + " következik!");
-            System.out.print("Lépés (pl. '1 2' vagy 'a3 2'), mentés ('save <fájl>'), kilépés ('exit'): ");
+            System.out.print("Lépés (pl. '1 2' vagy 'a 2'), mentés ('save <fájl>'), kilépés ('exit'): ");
             String input = readLineOrDefault("exit");
 
             if ("exit".equalsIgnoreCase(input)) {
