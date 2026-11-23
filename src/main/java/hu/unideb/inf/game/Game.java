@@ -8,6 +8,8 @@ import hu.unideb.inf.state.Board;
 import hu.unideb.inf.state.Vehicle;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Scanner;
@@ -31,11 +33,15 @@ public class Game {
 
     public void start() {
         System.out.println("=== RUSH HOUR JÁTÉK ===");
-        System.out.print("Működési mód (1: alapértelmezett pálya fájlból, 2: egyedi pályafájl megadása): ");
+        System.out.print("Működési mód (1: alapértelmezett pálya fájlból, 2: egyedi pályafájl vagy mentett állás): ");
         String mode = readLineOrDefault("1");
 
         if ("2".equals(mode)) {
-            System.out.print("Adja meg a fájl elérési útját (pl. map2.txt): ");
+            List<String> savedFiles = GameLoader.listSavedFiles();
+            if (!savedFiles.isEmpty()) {
+                System.out.println("Elmentett pályaállások (saves/): " + String.join(", ", savedFiles));
+            }
+            System.out.print("Adja meg a fájl nevét vagy elérési útját (pl. map2.txt vagy saves/...): ");
             String path = readLineOrDefault("");
             board = GameLoader.loadOrDefault(path);
         } else {
@@ -54,7 +60,7 @@ public class Game {
             renderBoard();
 
             System.out.println("\n" + playerName + " következik!");
-            System.out.print("Lépés (pl. '1 2' vagy 'a 2'), mentés ('save <fájl>'), kilépés ('exit'): ");
+            System.out.print("Lépés (pl. '1 2' vagy 'a 2'), mentés ('save <név>'), kilépés ('exit'): ");
             String input = readLineOrDefault("exit");
 
             if ("exit".equalsIgnoreCase(input)) {
@@ -137,8 +143,8 @@ public class Game {
             return true;
         }
         try {
-            GameLoader.save(board, targetPath);
-            System.out.println("Aktuális állás elmentve: " + targetPath);
+            Path savedTo = GameLoader.save(board, targetPath);
+            System.out.println("Aktuális állás elmentve: " + savedTo);
         } catch (IOException | IllegalArgumentException e) {
             System.out.println("Hiba a mentés során: " + e.getMessage());
         }

@@ -21,9 +21,11 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
-
+import java.util.stream.Stream;
 
 public final class GameLoader {
+    public static final Path SAVES_DIR = Path.of("saves");
+
     private static final Logger logger = LoggerFactory.getLogger(GameLoader.class);
     private static final String DEFAULT_RESOURCE = "/map1.txt";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
@@ -46,36 +48,29 @@ public final class GameLoader {
         String normalized = normalizeResourcePath(resourcePath);
         try (InputStream is = GameLoader.class.getResourceAsStream(normalized)) {
             if (is == null) {
-                logger.warn("Erőforrás nem található ({}), alapértelmezett pálya töltődik be.", normalized);
+                logger.warn("Eroforras nem talalhato ({}), alapertelmezett palya toltodik be.", normalized);
                 return createDefaultBoard();
             }
             return parseFromStream(is, normalized);
         } catch (Exception e) {
-            logger.error("Hiba az erőforrás beolvasásakor ({}), alapértelmezett pálya töltődik be.", normalized, e);
+            logger.error("Hiba az eroforrás beolvasasakor ({}), alapertelmezett palya toltodik be.", normalized, e);
             return createDefaultBoard();
         }
     }
 
     public static Board loadOrDefault(String filePath) {
         if (filePath == null || filePath.isBlank()) {
-            logger.warn("Üres fájlnév, alapértelmezett pálya töltődik be.");
+            logger.warn("Ures fajlnev, alapertelmezett palya toltodik be.");
             return createDefaultBoard();
         }
 
         String trimmed = filePath.trim();
-        Path path;
-        try {
-            path = Path.of(trimmed);
-        } catch (InvalidPathException e) {
-            logger.warn("Érvénytelen fájlútvonal ({}), alapértelmezett pálya töltődik be.", trimmed, e);
-            return createDefaultBoard();
-        }
-
-        if (Files.isRegularFile(path)) {
-            try (InputStream is = Files.newInputStream(path)) {
-                return parseFromStream(is, trimmed);
+        Path resolvedFile = resolveExistingFile(trimmed);
+        if (resolvedFile != null) {
+            try (InputStream is = Files.newInputStream(resolvedFile)) {
+                return parseFromStream(is, resolvedFile.toString());
             } catch (Exception e) {
-                logger.error("Hiba a fájl beolvasásakor ({}), alapértelmezett pálya töltődik be.", trimmed, e);
+                logger.error("Hiba a fajl beolvasasakor ({}), alapertelmezett palya toltodik be.", resolvedFile, e);
                 return createDefaultBoard();
             }
         }
@@ -86,20 +81,24 @@ public final class GameLoader {
                 return parseFromStream(is, resourceName);
             }
         } catch (Exception e) {
-            logger.error("Hiba az erőforrás beolvasásakor ({}), alapértelmezett pálya töltődik be.", resourceName, e);
+            logger.error("Hiba az eroforras beolvasasakor ({}), alapertelmezett palya toltodik be.", resourceName, e);
             return createDefaultBoard();
         }
 
-        logger.warn("Fájl nem található ({}), alapértelmezett pálya töltődik be.", trimmed);
+        logger.warn("Fajl nem talalhato ({}), alapertelmezett palya toltodik be.", trimmed);
         return createDefaultBoard();
     }
 
-    public static void save(Board board, String filePath) throws IOException {
+    public static Path save(Board board, String filePath) throws IOException {
         if (board == null || filePath == null || filePath.isBlank()) {
             throw new IllegalArgumentException("A tábla és a fájl elérési útja nem lehet üres.");
         }
-        Path path = Path.of(filePath.trim());
-        if (filePath.trim().toLowerCase(Locale.ROOT).endsWith(".json")) {
+        Path path = resolveSaveTarget(filePath.trim());
+        if (path.getParent() != null) {
+            Files.createDirectories(path.getParent());
+        }
+
+        if (path.toString().toLowerCase(Locale.ROOT).endsWith(".json")) {
             try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
                 List<VehicleData> vehicleData = board.getVehicles().stream()
                         .map(v -> new VehicleData(v.id(), v.length(), v.orientation(), v.topLeft()))
@@ -107,7 +106,7 @@ public final class GameLoader {
                 BoardSnapshot snapshot = new BoardSnapshot(board.getRows(), board.getCols(), vehicleData);
                 OBJECT_MAPPER.writeValue(writer, snapshot);
             }
-            return;
+            return path;
         }
 
         try (BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
@@ -119,6 +118,23 @@ public final class GameLoader {
                         + vehicle.topLeft().row() + " " + vehicle.topLeft().col());
                 writer.newLine();
             }
+        }
+        return path;
+    }
+
+    public static List<String> listSavedFiles() {
+        if (!Files.isDirectory(SAVES_DIR)) {
+            return List.of();
+        }
+        try (Stream<Path> stream = Files.list(SAVES_DIR)) {
+            return stream
+                    .filter(Files::isRegularFile)
+                    .map(p -> p.getFileName().toString())
+                    .sorted()
+                    .toList();
+        } catch (IOException e) {
+            logger.warn("Nem sikerült kilistázni a mentett állásokat.", e);
+            return List.of();
         }
     }
 
@@ -134,6 +150,44 @@ public final class GameLoader {
         board.addVehicle(new Vehicle("C", 2, Orientation.VERTICAL, new Coordinate(3, 5)));
         board.addVehicle(new Vehicle("D", 3, Orientation.HORIZONTAL, new Coordinate(1, 7)));
         return board;
+    }
+
+    private static Path resolveSaveTarget(String trimmed) {
+        Path rawPath = Path.of(trimmed);
+        if (rawPath.getParent() != null) {
+            return rawPath;
+        }
+        String fileName = trimmed.contains(".") ? trimmed : trimmed + ".txt";
+        return SAVES_DIR.resolve(fileName);
+    }
+
+    private static Path resolveExistingFile(String trimmed) {
+        Path direct;
+        try {
+            direct = Path.of(trimmed);
+        } catch (InvalidPathException e) {
+            return null;
+        }
+        if (Files.isRegularFile(direct)) {
+            return direct;
+        }
+        if (direct.getParent() == null) {
+            Path inSaves = SAVES_DIR.resolve(trimmed);
+            if (Files.isRegularFile(inSaves)) {
+                return inSaves;
+            }
+            if (!trimmed.contains(".")) {
+                Path txtInSaves = SAVES_DIR.resolve(trimmed + ".txt");
+                if (Files.isRegularFile(txtInSaves)) {
+                    return txtInSaves;
+                }
+                Path jsonInSaves = SAVES_DIR.resolve(trimmed + ".json");
+                if (Files.isRegularFile(jsonInSaves)) {
+                    return jsonInSaves;
+                }
+            }
+        }
+        return null;
     }
 
     private static Board parseFromStream(InputStream inputStream, String sourceName) throws IOException {
