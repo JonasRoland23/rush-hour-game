@@ -1,0 +1,53 @@
+{
+  "rows" : 6,
+  "cols" : 12,
+  "vehicles" : [ {
+    "id" : "1",
+    "length" : 2,
+    "orientation" : "HORIZONTAL",
+    "topLeft" : {
+      "row" : 4,
+      "col" : 0
+    }
+  }, {
+    "id" : "2",
+    "length" : 2,
+    "orientation" : "HORIZONTAL",
+    "topLeft" : {
+      "row" : 1,
+      "col" : 10
+    }
+  }, {
+    "id" : "A",
+    "length" : 3,
+    "orientation" : "VERTICAL",
+    "topLeft" : {
+      "row" : 3,
+      "col" : 3
+    }
+  }, {
+    "id" : "B",
+    "length" : 2,
+    "orientation" : "HORIZONTAL",
+    "topLeft" : {
+      "row" : 1,
+      "col" : 2
+    }
+  }, {
+    "id" : "C",
+    "length" : 2,
+    "orientation" : "VERTICAL",
+    "topLeft" : {
+      "row" : 1,
+      "col" : 7
+    }
+  }, {
+    "id" : "D",
+    "length" : 3,
+    "orientation" : "HORIZONTAL",
+    "topLeft" : {
+      "row" : 2,
+      "col" : 8
+    }
+  } ]
+}
