@@ -9,7 +9,7 @@ Egy Java nyelven megvalósított, konzolos Rush Hour táblajáték. A játékos 
 - **Tesztelés:** JUnit 5, Mockito
 - **Kódlefedettség:** JaCoCo Maven Plugin – legalább 80%-os sorlefedettség a teljes projektkódra (`BUNDLE` szinten)
 - **Kódstílus ellenőrzése:** Checkstyle Maven Plugin (`checkstyle.xml` alapján)
-- **Adatbázis:** H2 – a győzelmek és a dicsőséglista tárolására
+- **Adatbázis:** H2 – a győzelmek és a ranglista tárolására
 - **JSON-kezelés:** Jackson Databind – játékállások JSON-formátumú mentéséhez és betöltéséhez
 - **Naplózás:** Logback Classic
 
