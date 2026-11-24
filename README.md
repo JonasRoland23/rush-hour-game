@@ -219,7 +219,7 @@ rush-hour-game/
 │           ├── game/                     # Játék- és AI-tesztek
 │           ├── io/                       # Betöltési és koordinátakezelési tesztek
 │           └── state/                    # Tábla- és járműtesztek
-├── saves/                                # Elmentett játékállások
+├── examples/                             # Elmentett játékállások
 ├── checkstyle.xml                        # Kódstílus-szabályok
 ├── mvnw / mvnw.cmd                       # Maven Wrapper indítófájlok
 └── pom.xml                               # Maven projektleíró és függőségek
